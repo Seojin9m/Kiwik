@@ -1,4 +1,4 @@
-# Kpop-Wiki
+# Kiwik
 A React-Native Project 📱
-For Fandoms of Kpop 🎙️ can view/edit Kpop celebrities' wiki 📝
+For Fandoms of Kpop 🎙️ An App where fans can view/edit K-pop celebrities' wiki 📝
 
