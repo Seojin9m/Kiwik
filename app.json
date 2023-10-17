@@ -8,6 +8,7 @@
       "expo-router"
     ],
     "name": "Kiwik",
-    "slug": "Kiwik"
+    "slug": "Kiwik",
+    "orientation": "portrait"
   }
 }

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { 
     View, 
     StyleSheet, 
-    Text, TextInput, 
+    Text, 
+    TextInput, 
     ActivityIndicator, 
     Button,
     ScrollView, 
@@ -20,6 +21,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [emailFilled, setEmailFilled] = useState(false);
 
     const auth = FIREBASE_AUTH;
 
@@ -31,7 +33,7 @@ const Login = () => {
             console.log(response);
         } catch (error) {
             console.log(error);
-            alert('Login failed: ' + error.message);
+            alert('Invalid email or password. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -49,6 +51,16 @@ const Login = () => {
         } finally {
             setLoading(false);
         }
+    }
+
+    const handleEmailEndEditing = () => {
+        setEmailFilled(true);
+        Keyboard.dismiss();
+    }
+
+    const handlePasswordEndEditing = () => {
+        if (emailFilled) signIn();
+        Keyboard.dismiss();
     }
 
     return (
@@ -73,6 +85,7 @@ const Login = () => {
                             underlineColorAndroid="transparent"
                             autoCorrect={false}
                             onChangeText={(text) => setEmail(text)}
+                            onEndEditing={handleEmailEndEditing}
                         ></TextInput>
                         <TextInput 
                             secureTextEntry={true}
@@ -82,9 +95,10 @@ const Login = () => {
                             placeholderTextColor="gray"
                             autoCapitalize="none"
                             onChangeText={(text) => setPassword(text)}
+                            onEndEditing={handlePasswordEndEditing}
                         ></TextInput>
                         { loading ? (
-                            <ActivityIndicator size="large" color="#0000ff" /> 
+                            <ActivityIndicator style={styles.loadingIndicator} size="large" color="#FFFFFF"/> 
                         ) : ( 
                             <> 
                                 <TouchableOpacity style={[styles.button, styles.buttonSpace]} onPress={() => signIn()}>
@@ -114,7 +128,7 @@ const styles = StyleSheet.create({
         width: '80%',
         marginVertical: 5,
         marginHorizontal: 40,
-        borderWidth: 1,
+        borderWidth: 0,
         borderRadius: 4,
         padding: 10,
         backgroundColor: '#fff',
@@ -146,4 +160,7 @@ const styles = StyleSheet.create({
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
     },
+    loadingIndicator: {
+        marginTop: 20,
+    }
 });
