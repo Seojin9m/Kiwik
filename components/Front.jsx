@@ -1,9 +1,10 @@
-import { useEffect, useState  } from 'react';
+import { useEffect, useState, useRef  } from 'react';
 import { 
     View, 
     StyleSheet, 
     Text, 
     TextInput, 
+    FlatList,
     Image,
     ActivityIndicator, 
     Button,
@@ -17,24 +18,39 @@ import { NavigationContainer } from '@react-navigation/native';
 import { LinearGradient }  from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
+import Taskbar from './Taskbar';
+
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 
 const Front = ({ navigation }) => {
     const [query, setQuery] = useState('');
+    const [groups, setGroups] = useState(['LE SSERAFIM', 'aespa', 'NewJeans', 'IVE', 'NMIXX', 'STAYC']);
 
-    const handleCreateEdit = () => {
-        // Empty function for now
-        console.log("Create/Edit triggered");
-    }
+    const textInputRef = useRef(null);
 
     const handleSearch = () => {
         // Empty function for now
         console.log("Search triggered with query: ", query);
+    };
+
+    const handleAddGroup = () => {
+        if (textInputRef.current) {
+            textInputRef.current.focus();
+        }
+    };
+
+    const groupLogos = {
+        'LE SSERAFIM': require('../assets/logos/lesserafim-logo.png'),
+        'aespa': require('../assets/logos/aespa-logo.png'),
+        'NewJeans': require('../assets/logos/newjeans-logo.png'),
+        'IVE': require('../assets/logos/ive-logo.png'),
+        'NMIXX': require('../assets/logos/nmixx-logo.png'),
+        'STAYC': require('../assets/logos/stayc-logo.png'),
+        // ... add more as needed
     }
 
-    const handleReadMore = () => {
-        // Empty function for now
-        console.log("See more triggered");
+    const getGroupLogo = (groupName) => {
+        return groupLogos[groupName] || null;
     }
 
     return (
@@ -44,68 +60,43 @@ const Front = ({ navigation }) => {
                     colors={['rgb(9, 205, 202)', 'rgb(23, 230, 156)']}
                     style={styles.container}
                 >   
-                    <TouchableOpacity style={styles.buttonCreateEdit} onPress={handleCreateEdit}>
-                        <Text style={styles.buttonText}>Create/Edit</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonSignOut} onPress={() => FIREBASE_AUTH.signOut()}>
                         <Text style={styles.buttonText}>Sign Out</Text>
                     </TouchableOpacity>
                     <Text style={styles.title}>KIWIK</Text>
                     <View style={styles.searchContainer}>
                         <TextInput
+                            ref={textInputRef}
                             style={styles.input}
                             value={query}
                             onChangeText={setQuery}
-                            placeholder="Search for an idol..."
+                            onSubmitEditing={handleSearch} 
+                            placeholder="Search for a group..."
                             placeholderTextColor="gray"
                         />
                         <TouchableOpacity style={styles.buttonSearch} onPress={handleSearch}>
                             <Ionicons name="ios-search" size={22} color="#17E69C"/>
                         </TouchableOpacity>
                     </View>
-                    <Text style={styles.secondaryTitle}>Recently Edited!</Text>
-                    <View style={styles.imageContainer}>
-                        <View style={styles.imageBox}>
-                            <Image 
-                                source={require('../assets/images/kimchaewon.png')} 
-                                style={styles.image} 
-                                resizeMode="cover"
-                            />
-                        </View>
+                    <Text style={styles.secondaryTitle}>Your Groups</Text>
+                    <View style={styles.gridContainer}>
+                        {groups.map((group, index) => (
+                            <View>
+                                <TouchableOpacity key={index} style={styles.imageButton} onPress={() => { /* handle group click here */ }}>
+                                    <Image source={getGroupLogo(group)} style={styles.image}/>
+                                </TouchableOpacity>
+                                <Text style={styles.groupName}>{group}</Text>
+                            </View>
+                        ))}
+                        <TouchableOpacity style={styles.buttonAddGroup} onPress={handleAddGroup}>
+                            <Text style={styles.buttonAddGroupText}>+</Text>
+                        </TouchableOpacity>
                     </View>
-                    <View style={styles.tableContainer}>
-                        <View style={styles.row}>
-                            <View style={styles.cellWrapper}>
-                                <Text style={styles.cellLabel}>Name</Text>
-                                <Text style={styles.cellData}>Kim Chae Won</Text>
-                            </View>
-                        </View>
-                        <View style={styles.row}>
-                            <View style={styles.cellWrapper}>
-                                <Text style={styles.cellLabel}>Birth</Text>
-                                <Text style={styles.cellData}>August 1, 2000 (23)</Text>
-                            </View>
-                        </View>
-                        <View style={styles.row}>
-                            <View style={styles.cellWrapper}>
-                                <Text style={styles.cellLabel}>Nationality</Text>
-                                <Text style={styles.cellData}>South Korea&nbsp;🇰🇷</Text>
-                            </View>
-                        </View>
-                        <View style={styles.row}>
-                            <View style={styles.cellWrapper}>
-                                <Text style={styles.cellLabel}>Group</Text>
-                                <Text style={styles.cellData}>LE SSERAFIM</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <TouchableOpacity style={styles.buttonReadMore} onPress={handleReadMore}>
-                        <Text style={styles.buttonText}>Read More</Text>
-                    </TouchableOpacity>
+                    <Taskbar/>
                 </LinearGradient>
             </TouchableWithoutFeedback>
         </NavigationContainer>
-    )
+    );
 }
 
 export default Front;
@@ -113,7 +104,6 @@ export default Front;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        position: 'relative',
     },
     searchContainer: {
         flexDirection: 'row',
@@ -122,61 +112,16 @@ const styles = StyleSheet.create({
         marginTop: 50,
         marginLeft: -10,
     },
-    imageContainer: {
-        width: 200,
-        height: 200,
-        alignItems: 'center',
-        alignSelf: 'center', 
-        justifyContent: 'center',
-        overflow: 'hidden',
-        backgroundColor: '#AFEEEE',
-        borderRadius: 20,
-        padding: 20,
-    },
-    tableContainer: {
-        marginTop: 15,
-    },
-    row: {
-        width: '80%',
-        alignSelf: 'center',
-        marginBottom: 5,
-    },
-    cellWrapper: {
+    gridContainer: {
         flexDirection: 'row',
-        borderRadius: 10,
-        overflow: 'hidden',
-    },
-    cellLabel: {
-        flex: 1,
-        color: '#17E69C',
-        fontFamily: 'BubbleFont',
-        fontWeight: 'bold',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        backgroundColor: 'white',
-    },
-    cellData: {
-        flex: 1,
-        color: 'gray',
-        fontFamily: 'BubbleFont',
-        fontWeight: 'bold',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        backgroundColor: '#AFEEEE',
-    },
-    imageBox: {
-        width: 180,
-        height: 180,
-        alignItems: 'center',
-        alignSelf: 'center', 
-        justifyContent: 'center',
-        overflow: 'hidden',
-        borderRadius: 20,
+        flexWrap: 'wrap',
+        justifyConent: 'flex-start',
+        marginLeft: 15,
     },
     title: {
         color: 'white',
         fontFamily: 'BubbleFont',
-        fontSize: 30,   
+        fontSize: 35,   
         fontWeight: 'bold',
         position: 'absolute',
         top: 10,
@@ -185,7 +130,7 @@ const styles = StyleSheet.create({
     secondaryTitle: {
         color: 'white',
         fontFamily: 'BubbleFont',
-        fontSize: 30,   
+        fontSize: 35,   
         fontWeight: 'bold',
         textAlign: 'center',
         marginTop: 40,
@@ -209,16 +154,12 @@ const styles = StyleSheet.create({
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
     },
-    buttonCreateEdit: {
-        width: 95,
-        alignItems: 'center',  
-        justifyContent: 'center',  
-        backgroundColor: 'white',
-        padding: 10,
-        borderRadius: 5,
-        position: 'absolute',
-        top: 10,
-        left: 195,
+    buttonAddGroupText: {
+        fontSize: 30,
+        color: '#17E69C',
+        textAlign: 'center',
+        fontFamily: 'BubbleFont',
+        fontWeight: 'bold',
     },
     buttonSignOut: {
         width: 80,
@@ -237,18 +178,33 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 5,
     },
-    buttonReadMore: {
-        width: 90,
-        alignItems: 'center',  
-        alignSelf: 'center', 
-        justifyContent: 'center',  
-        backgroundColor: 'white',
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 10,
+    buttonAddGroup: {
+        width: 80,
+        height: 80,
+        margin: 5,
+        borderRadius: 40,
+        backgroundColor: 'white', 
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    groupName: {
+        color: 'white',
+        fontFamily: 'BubbleFont',
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 2.5,
+        marginBottom: 10,
+    },
+    imageButton: {
+        width: 80,
+        height: 80,
+        margin: 5,
+        borderRadius: 40,
+        overflow: 'hidden',
     },
     image: {
-        width: '150%',
-        height: '150%',
+        width: '100%', 
+        height: '100%',
+        resizeMode: 'contain', 
     }
 });
