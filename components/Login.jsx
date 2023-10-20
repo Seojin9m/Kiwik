@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useCallback, useLayoutEffect } from 'react';
 import { 
     View, 
     StyleSheet, 
@@ -10,20 +10,36 @@ import {
     KeyboardAvoidingView, 
     TouchableOpacity,
     TouchableWithoutFeedback, 
-    Keyboard 
+    Keyboard,
 } from 'react-native';
 import { LinearGradient }  from 'expo-linear-gradient';
 
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 const Login = () => {
+    const auth = FIREBASE_AUTH;
+    const navigation = useNavigation();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [emailFilled, setEmailFilled] = useState(false);
 
-    const auth = FIREBASE_AUTH;
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: false,
+        });
+    }, [navigation]);
+
+    useFocusEffect(
+        useCallback(() => {
+            // Reset email and password states every time
+            setEmail('');
+            setPassword('');
+        }, [])
+    );
 
     const signIn = async () => {
         setLoading(true);
@@ -31,6 +47,8 @@ const Login = () => {
         try {
             const response = await signInWithEmailAndPassword(auth, email, password);
             console.log(response);
+
+            navigation.navigate('Front');
         } catch (error) {
             console.log(error);
             alert('Invalid email or password. Please try again.');
@@ -45,6 +63,8 @@ const Login = () => {
         try {
             const response = await createUserWithEmailAndPassword(auth, email, password);
             console.log(response);
+
+            navigation.navigate('Front');
         } catch (error) {
             console.log(error);
             alert('Register failed: ' + error.message);
@@ -113,7 +133,7 @@ const Login = () => {
                 </KeyboardAvoidingView>
             </LinearGradient>
         </TouchableWithoutFeedback>
-    )
+    );
 }
 
 export default Login;

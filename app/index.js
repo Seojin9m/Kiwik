@@ -1,5 +1,5 @@
 import { useEffect, useState  } from 'react';
-import { View, Text, ScrollView, SafeAreaView } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
@@ -11,6 +11,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 
 import Login from '../components/Login.jsx';
 import Front from '../components/Front.jsx';
+import Group from '../components/Group.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,16 +33,16 @@ const Home = () => {
     }
     
     return (
-        <NavigationContainer independent={true}>
-            <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}> 
-            { user ? (
-                <Stack.Screen name="Front" component={Front} options={{ headerShown: false }}/>
-            ) : (
-                <Stack.Screen name="Login" component={Login} options={{ headerShown: false }}/>
-            )}
-            </Stack.Navigator>
-        </NavigationContainer>
-    )
+        <SafeAreaView style={{ flex: 1 }}>
+            <NavigationContainer independent={true}>
+                <Stack.Navigator initialRouteName={user ? "Front" : "Login"} screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="Login" component={Login}/>
+                    <Stack.Screen name="Front" component={Front}/>
+                    <Stack.Screen name="Group" component={Group}/>
+                </Stack.Navigator>
+            </NavigationContainer>
+        </SafeAreaView>
+    );
 }
 
 export default Home;

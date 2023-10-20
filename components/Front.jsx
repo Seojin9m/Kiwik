@@ -4,17 +4,12 @@ import {
     StyleSheet, 
     Text, 
     TextInput, 
-    FlatList,
     Image,
-    ActivityIndicator, 
-    Button,
-    ScrollView, 
-    KeyboardAvoidingView, 
     TouchableOpacity,
     TouchableWithoutFeedback, 
-    Keyboard
+    Keyboard,
 } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { useNavigation, NavigationContainer } from '@react-navigation/native';
 import { LinearGradient }  from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -22,7 +17,9 @@ import Taskbar from './Taskbar';
 
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 
-const Front = ({ navigation }) => {
+const Front = () => {
+    const navigation = useNavigation();
+
     const [query, setQuery] = useState('');
     const [groups, setGroups] = useState(['LE SSERAFIM', 'aespa', 'NewJeans', 'IVE', 'NMIXX', 'STAYC']);
 
@@ -60,7 +57,10 @@ const Front = ({ navigation }) => {
                     colors={['rgb(9, 205, 202)', 'rgb(23, 230, 156)']}
                     style={styles.container}
                 >   
-                    <TouchableOpacity style={styles.buttonSignOut} onPress={() => FIREBASE_AUTH.signOut()}>
+                    <TouchableOpacity style={styles.buttonSignOut} onPress={async () => {
+                        await FIREBASE_AUTH.signOut();
+                        navigation.navigate('Login');
+                    }}>
                         <Text style={styles.buttonText}>Sign Out</Text>
                     </TouchableOpacity>
                     <Text style={styles.title}>KIWIK</Text>
@@ -82,7 +82,7 @@ const Front = ({ navigation }) => {
                     <View style={styles.gridContainer}>
                         {groups.map((group, index) => (
                             <View>
-                                <TouchableOpacity key={index} style={styles.imageButton} onPress={() => { /* handle group click here */ }}>
+                                <TouchableOpacity key={index} style={styles.imageButton} onPress={() => {navigation.navigate('Group', { groupId: group })}}>
                                     <Image source={getGroupLogo(group)} style={styles.image}/>
                                 </TouchableOpacity>
                                 <Text style={styles.groupName}>{group}</Text>
@@ -189,8 +189,8 @@ const styles = StyleSheet.create({
     },
     groupName: {
         color: 'white',
-        fontFamily: 'BubbleFont',
-        fontSize: 16,
+        fontSize: 12,
+        fontWeight: '900',
         textAlign: 'center',
         marginTop: 2.5,
         marginBottom: 10,
