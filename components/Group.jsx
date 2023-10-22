@@ -18,13 +18,14 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { LinearGradient }  from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons';
+import Option from './Option';
 
 // import firebase here
 
 import Taskbar from './Taskbar';
 
 const Group = ({ navigation, route }) => {
-    const [groupData, setGroupData] = useState(null);
+    const [group, setGroup] = useState(null);
 
     const groupImages = {
         'LE SSERAFIM': require('../assets/images/lesserafim-group.png'),
@@ -37,23 +38,23 @@ const Group = ({ navigation, route }) => {
     }
 
     useEffect(() => {
-        const groupId = route.params.groupId;
-        setGroupData(groupId);
+        const group = route.params.group;
+        setGroup(group);
 
         // Fetch group data from firebase here
-    }, [route.params.groupId]);
+    }, [route.params.group]);
 
-    const getGroupImages = (groupName) => {
-        return groupImages[groupName] || null;
+    const getGroupImages = (group) => {
+        return groupImages[group] || null;
     }
 
     return (
         <NavigationContainer independent={true}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                {groupData ? (
+                {group ? (
                     <View style={styles.container}>
                         <Image 
-                            source={getGroupImages(groupData)} 
+                            source={getGroupImages(group)} 
                             style={styles.imageWallpaper}
                         />
                         <LinearGradient
@@ -62,13 +63,14 @@ const Group = ({ navigation, route }) => {
                             style={styles.gradient}
                         />
                         <Text style={styles.title}>
-                            {groupData}
+                            {group}
                         </Text>
                         <TouchableOpacity style={styles.buttonGoBack} onPress={() => {
                             navigation.navigate('Front');
                         }}>
                             <AntDesign name="arrowleft" size={20} style={styles.buttonText}/>
                         </TouchableOpacity>
+                        <Option group={group}/>
                         <Taskbar/>
                     </View>
                 ) : (

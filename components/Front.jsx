@@ -82,7 +82,7 @@ const Front = () => {
                     <View style={styles.gridContainer}>
                         {groups.map((group, index) => (
                             <View>
-                                <TouchableOpacity key={index} style={styles.imageButton} onPress={() => {navigation.navigate('Group', { groupId: group })}}>
+                                <TouchableOpacity key={index} style={styles.imageButton} onPress={() => {navigation.navigate('Group', { group: group })}}>
                                     <Image source={getGroupLogo(group)} style={styles.image}/>
                                 </TouchableOpacity>
                                 <Text style={styles.groupName}>{group}</Text>
