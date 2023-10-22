@@ -13,6 +13,7 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback, 
     Keyboard,
+    Dimensions,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -25,6 +26,9 @@ import Option from './Option';
 import Taskbar from './Taskbar';
 
 const Group = ({ navigation, route }) => {
+    // Screen height (prototype) 
+    const screenHeight = Dimensions.get('window').height;
+
     const [group, setGroup] = useState(null);
 
     const groupImages = {
@@ -50,35 +54,40 @@ const Group = ({ navigation, route }) => {
 
     return (
         <NavigationContainer independent={true}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                {group ? (
-                    <View style={styles.container}>
-                        <Image 
-                            source={getGroupImages(group)} 
-                            style={styles.imageWallpaper}
-                        />
-                        <LinearGradient
-                            colors={['transparent', 'transparent', '#f5f5f5']}
-                            locations={[0, 0.65, 1]}
-                            style={styles.gradient}
-                        />
-                        <Text style={styles.title}>
-                            {group}
-                        </Text>
-                        <TouchableOpacity style={styles.buttonGoBack} onPress={() => {
-                            navigation.navigate('Front');
-                        }}>
-                            <AntDesign name="arrowleft" size={20} style={styles.buttonText}/>
-                        </TouchableOpacity>
-                        <Option group={group}/>
-                        <Taskbar/>
-                    </View>
-                ) : (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#17E69C" />
-                    </View>
-                )}
-            </TouchableWithoutFeedback>
+            <ScrollView 
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ flexGrow: 1 }} 
+            >
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    {group ? (
+                        <View style={styles.container}>
+                            <Image 
+                                source={getGroupImages(group)} 
+                                style={styles.imageWallpaper}
+                            />
+                            <LinearGradient
+                                colors={['transparent', 'transparent', '#f5f5f5']}
+                                locations={[0, 0.65, 1]}
+                                style={styles.gradient}
+                            />
+                            <Text style={styles.title}>
+                                {group}
+                            </Text>
+                            <TouchableOpacity style={styles.buttonGoBack} onPress={() => {
+                                navigation.navigate('Front');
+                            }}>
+                                <AntDesign name="arrowleft" size={20} style={styles.buttonText}/>
+                            </TouchableOpacity>
+                            <Option group={group}/>
+                        </View>
+                    ) : (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#17E69C" />
+                        </View>
+                    )}
+                </TouchableWithoutFeedback>
+            </ScrollView>
+            <Taskbar/>
         </NavigationContainer>
     );
 }

@@ -15,8 +15,9 @@ import {
 import { LinearGradient }  from 'expo-linear-gradient';
 
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { FIREBASE_AUTH } from '../FirebaseConfig';
+import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { ref, set, get, child } from 'firebase/database';
 
 const Login = () => {
     const auth = FIREBASE_AUTH;
