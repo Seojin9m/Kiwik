@@ -10,6 +10,7 @@ import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 
 import Login from '../components/Login.jsx';
+import SignUp from '../components/SignUp';
 import Front from '../components/Front.jsx';
 import Group from '../components/Group.jsx';
 
@@ -39,6 +40,7 @@ const Home = () => {
                     <Stack.Screen name="Login" component={Login}/>
                     <Stack.Screen name="Front" component={Front}/>
                     <Stack.Screen name="Group" component={Group}/>
+                    <Stack.Screen name="SignUp" component={SignUp}/>
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaView>

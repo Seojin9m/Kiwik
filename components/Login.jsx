@@ -16,7 +16,7 @@ import { LinearGradient }  from 'expo-linear-gradient';
 
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { ref, set, get, child } from 'firebase/database';
 
 const Login = () => {
@@ -56,33 +56,7 @@ const Login = () => {
         } finally {
             setLoading(false);
         }
-    }
-
-    const signUp = async () => {
-        setLoading(true);
-
-        try {
-            const response = await createUserWithEmailAndPassword(auth, email, password);
-            console.log(response);
-
-            navigation.navigate('Front');
-        } catch (error) {
-            console.log(error);
-            alert('Register failed: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const handleEmailEndEditing = () => {
-        setEmailFilled(true);
-        Keyboard.dismiss();
-    }
-
-    const handlePasswordEndEditing = () => {
-        if (emailFilled) signIn();
-        Keyboard.dismiss();
-    }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -101,22 +75,20 @@ const Login = () => {
                             value={email}
                             style={styles.input} 
                             placeholder="Email" 
-                            placeholderTextColor="gray"
+                            placeholderTextColor="lightgray"
                             autoCapitalize="none"
                             underlineColorAndroid="transparent"
                             autoCorrect={false}
                             onChangeText={(text) => setEmail(text)}
-                            onEndEditing={handleEmailEndEditing}
                         ></TextInput>
                         <TextInput 
                             secureTextEntry={true}
                             value={password}
                             style={styles.input} 
                             placeholder="Password" 
-                            placeholderTextColor="gray"
+                            placeholderTextColor="lightgray"
                             autoCapitalize="none"
                             onChangeText={(text) => setPassword(text)}
-                            onEndEditing={handlePasswordEndEditing}
                         ></TextInput>
                         { loading ? (
                             <ActivityIndicator style={styles.loadingIndicator} size="large" color="#FFFFFF"/> 
@@ -125,7 +97,7 @@ const Login = () => {
                                 <TouchableOpacity style={[styles.button, styles.buttonSpace]} onPress={() => signIn()}>
                                     <Text style={styles.buttonText}>Login</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} onPress={() => signUp()}>
+                                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
                                     <Text style={styles.buttonText}>Create Account</Text>
                                 </TouchableOpacity>
                             </>
