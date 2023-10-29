@@ -9,18 +9,42 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    Image,
 } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
 import { ref, push, onValue, query, equalTo, orderByChild } from 'firebase/database';
 
 const Option = (props) => {
+    const [username, setUsername] = useState('');
     const [posts, setPosts] = useState([]);
     const [selectedOption, setSelectedOption] = useState('Posts');
     const [postText, setPostText] = useState('');
     const [threadTitle, setThreadTitle] = useState('');
     const [threadSelected, setThreadSelected] = useState(true);
+
+    useEffect(() => {  
+        const usernameRef = ref(FIREBASE_DATABASE, 'usernames');
+        const usernamesQuery = query(usernameRef, orderByChild('uid'), equalTo(FIREBASE_AUTH.currentUser.uid));
+
+        // Listening for data changes
+        const unsubscribe = onValue(usernamesQuery, 
+            (snapshot) => {
+                let fetchedUsername = '';
+                snapshot.forEach((childSnapshot) => {
+                    fetchedUsername = childSnapshot.key;
+                });
+
+                setUsername(fetchedUsername);
+            }, (error) => {
+                console.error("Firebase read error: ", error);
+            }
+        );
+
+        // Clean up listener when component unmounts
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         if (selectedOption === 'Posts') {
@@ -85,6 +109,18 @@ const Option = (props) => {
         }
     }
 
+    const handleComment = () => {
+        // Empty function for now
+        console.log("Comment triggered");
+    }
+
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        
+        return formattedDate;
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView 
@@ -143,9 +179,20 @@ const Option = (props) => {
                         </View>
                     )}
                 </View>
-                {selectedOption === 'Posts' && posts.map(post => (
+                {selectedOption === 'Posts' && username && posts.map(post => (
                     <View key={post.id} style={styles.textContainer}>
+                        <View style={styles.profileContainer}>
+                            <Image source={require('../assets/images/default-profile.png')} style={styles.profileImage}/>
+                            <View style={styles.userDetailsContainer}>
+                                <Text style={styles.usernameText}>{username}</Text>
+                                <Text style={styles.timestampText}>{formatDate(post.timestamp)}</Text>
+                                <TouchableOpacity onPress={handleComment}>
+                                    <MaterialCommunityIcons name="comment-text" size={24} color="#17E69C" style={styles.iconComment} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                         <Text style={styles.postText}>{post.postText}</Text>
+                        <Text style={styles.threadTitleText}>#{post.threadTitle}</Text>
                     </View>
                 ))}
                 {selectedOption === 'Wiki' && <Text style={styles.displayOption}>Wiki here</Text>}
@@ -166,6 +213,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginHorizontal: 20,
     },
+    profileContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    userDetailsContainer: {
+        flexDirection: 'column',
+        marginLeft: 10,
+        flex: 1,
+    },
     textContainer: {
         padding: 15,
         marginVertical: 5,
@@ -173,6 +230,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 20,
         elevation: 2,
+        position: 'relative',
     },
     optionContainer: {
         flexDirection: 'row',
@@ -235,8 +293,17 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     postText: {
-        fontFamily: 'BubbleFont',
+        fontWeight: '500',
+    },
+    threadTitleText: {
+        color: '#17E69C',
+        fontWeight: '800',
+    },
+    usernameText: {
         fontWeight: 'bold',
+    },
+    timestampText: {
+        color: 'grey',
     },
     buttonText: {
         color: 'white',
@@ -255,4 +322,16 @@ const styles = StyleSheet.create({
     iconButton: {
         marginLeft: 10, 
     },
+    iconComment: {
+        position: 'absolute',
+        top: -30,
+        right: 0,
+    },
+    profileImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderColor: '#f3f2f1',
+        borderWidth: 1,
+    }
 });

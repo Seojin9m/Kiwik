@@ -82,7 +82,7 @@ const SignUp = () => {
             const userId = response.user.uid;
             set(ref(FIREBASE_DATABASE, 'usernames/' + username), { uid: userId });
 
-            navigation.navigate('Front');
+            navigation.navigate('Photo');
         } catch (error) {
             console.log('Error with creating user', error);
 
