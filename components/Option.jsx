@@ -10,45 +10,78 @@ import {
     KeyboardAvoidingView,
     Platform,
     Image,
+    Alert,
 } from 'react-native';
-import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
-import { ref, push, onValue, query, equalTo, orderByChild } from 'firebase/database';
+import { ref, push, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
 
 const Option = (props) => {
-    const [username, setUsername] = useState('');
+    const [userDetails, setUserDetails] = useState({});
     const [posts, setPosts] = useState([]);
     const [selectedOption, setSelectedOption] = useState('Posts');
     const [postText, setPostText] = useState('');
     const [threadTitle, setThreadTitle] = useState('');
     const [threadSelected, setThreadSelected] = useState(true);
 
-    useEffect(() => {  
-        const usernameRef = ref(FIREBASE_DATABASE, 'usernames');
-        const usernamesQuery = query(usernameRef, orderByChild('uid'), equalTo(FIREBASE_AUTH.currentUser.uid));
-
-        // Listening for data changes
-        const unsubscribe = onValue(usernamesQuery, 
-            (snapshot) => {
-                let fetchedUsername = '';
+    useEffect(() => {
+        if (selectedOption === 'Posts') {
+            // Reference to post database node
+            const postRef = ref(FIREBASE_DATABASE, 'posts');
+            const postsQuery = query(postRef, orderByChild('groupId'), equalTo(props.group));
+    
+            const unsubscribe = onValue(postsQuery, (snapshot) => {
+                let fetchedPosts = [];
+                let userDetailsFetchPromises = [];
                 snapshot.forEach((childSnapshot) => {
-                    fetchedUsername = childSnapshot.key;
+                    const post = childSnapshot.val();
+                    post.id = childSnapshot.key;
+                    fetchedPosts.push(post);
+    
+                    // Prepare promises to fetch user details
+                    userDetailsFetchPromises.push(new Promise((resolve) => {
+                        const usernamesQuery = query(ref(FIREBASE_DATABASE, 'usernames'), orderByChild('uid'), equalTo(post.userId));
+                        onValue(usernamesQuery, (usernameSnapshot) => {
+                            let username;
+                            usernameSnapshot.forEach((child) => {
+                                username = child.key;
+                                return true;
+                            });
+    
+                            const profilePictureRef = ref(FIREBASE_DATABASE, `profile_pictures/${post.userId}/photoURL`);
+                            onValue(profilePictureRef, (profilePictureSnapshot) => {
+                                let profileImageUrl = profilePictureSnapshot.exists() ? { uri: profilePictureSnapshot.val() } : require('../assets/images/default-profile.png');
+                                resolve({ userId: post.userId, username, profileImageUrl });
+                            }, { onlyOnce: true });
+                        }, { onlyOnce: true });
+                    }));
                 });
-
-                setUsername(fetchedUsername);
-            }, (error) => {
-                console.error("Firebase read error: ", error);
-            }
-        );
-
-        // Clean up listener when component unmounts
-        return () => unsubscribe();
-    }, []);
+    
+                // Fetch all user details
+                Promise.all(userDetailsFetchPromises).then((fetchedUserDetails) => {
+                    const userDetailsMap = fetchedUserDetails.reduce((acc, { userId, username, profileImageUrl }) => {
+                        acc[userId] = {
+                            username: username || 'Unknown',
+                            profileImageUrl: profileImageUrl
+                        };
+                        return acc;
+                    }, {});
+    
+                    setUserDetails(userDetailsMap);
+                });
+    
+                // Reverse the order of posts and set to state
+                setPosts(fetchedPosts.reverse());
+            });
+    
+            return () => unsubscribe();
+        }
+    }, [selectedOption, props.group]);
 
     useEffect(() => {
         if (selectedOption === 'Posts') {
-            // Reference to Posts node
+            // Reference to post database node
             const postRef = ref(FIREBASE_DATABASE, 'posts');
 
             // Query to filter by groupId
@@ -62,7 +95,7 @@ const Option = (props) => {
                     post.id = childSnapshot.key;
                     fetchedPosts.push(post);
                 });
-                setPosts(fetchedPosts);
+                setPosts(fetchedPosts.reverse());
             });
 
             // Clean up listener when component unmounts
@@ -72,12 +105,12 @@ const Option = (props) => {
 
     const handleOptionClick = (option) => {
         setSelectedOption(option);
-    }
+    };
 
     const handlePostImageUpload = () => {
         // Empty function for now
         console.log("Image upload triggered");
-    }
+    };
 
     const handlePost = () => {
         try {
@@ -91,7 +124,7 @@ const Option = (props) => {
 
             console.log('New post:', post);
 
-            // Reference to storage node
+            // Reference to post database node
             const postsRef = ref(FIREBASE_DATABASE, 'posts');
 
             // Push the post object to the database
@@ -107,19 +140,51 @@ const Option = (props) => {
             setPostText('');
             setThreadTitle('');
         }
-    }
+    };
+
+    const handleDeletePost = (postId) => {
+        // Reference to post database node
+        const postRef = ref(FIREBASE_DATABASE, `posts/${postId}`);
+
+        remove(postRef).then(() => {
+            console.log("Post successfully deleted");
+
+            setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+        }).catch ((error) => {
+            console.log("Error deleting post: ", error);
+        });
+    };
 
     const handleComment = () => {
         // Empty function for now
         console.log("Comment triggered");
-    }
+    };
+
+    const confirmDeletePost = (postId) => {
+        Alert.alert(
+            "Delete Post",
+            "Are you sure you want to delete this post?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Post deletion cancelled"),
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    onPress: () => handleDeletePost(postId),
+                    style: "destructive"
+                }
+            ]
+        );
+    };
 
     const formatDate = (timestamp) => {
         const date = new Date(timestamp);
         const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
         
         return formattedDate;
-    }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -179,20 +244,36 @@ const Option = (props) => {
                         </View>
                     )}
                 </View>
-                {selectedOption === 'Posts' && username && posts.map(post => (
+                {selectedOption === 'Posts' && posts.map(post => (
                     <View key={post.id} style={styles.textContainer}>
                         <View style={styles.profileContainer}>
-                            <Image source={require('../assets/images/default-profile.png')} style={styles.profileImage}/>
+                            <Image 
+                                source={userDetails[post.userId]?.profileImageUrl} 
+                                style={styles.profileImage}
+                            />
                             <View style={styles.userDetailsContainer}>
-                                <Text style={styles.usernameText}>{username}</Text>
+                                <Text style={styles.usernameText}>
+                                    {userDetails[post.userId]?.username}
+                                </Text>
                                 <Text style={styles.timestampText}>{formatDate(post.timestamp)}</Text>
                                 <TouchableOpacity onPress={handleComment}>
                                     <MaterialCommunityIcons name="comment-text" size={24} color="#17E69C" style={styles.iconComment} />
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        <Text style={styles.postText}>{post.postText}</Text>
-                        <Text style={styles.threadTitleText}>#{post.threadTitle}</Text>
+                        <View>
+                        </View>
+                        <View style={styles.postContentContainer}>
+                            <View style={styles.postTextContainer}>
+                                <Text style={styles.postText}>{post.postText}</Text>
+                                <Text style={styles.threadTitleText}>#{post.threadTitle}</Text>
+                            </View>
+                            {post.userId === FIREBASE_AUTH.currentUser.uid && (
+                                <TouchableOpacity onPress={() => confirmDeletePost(post.id)}>
+                                    <Ionicons name="ios-trash-sharp" size={24} color="#FF7377" />
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
                 ))}
                 {selectedOption === 'Wiki' && <Text style={styles.displayOption}>Wiki here</Text>}
@@ -221,6 +302,14 @@ const styles = StyleSheet.create({
     userDetailsContainer: {
         flexDirection: 'column',
         marginLeft: 10,
+        flex: 1,
+    },
+    postContentContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    postTextContainer: {
         flex: 1,
     },
     textContainer: {
