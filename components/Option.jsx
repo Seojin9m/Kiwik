@@ -6,12 +6,12 @@ import {
     TouchableOpacity, 
     StyleSheet, 
     TextInput,
-    ScrollView,
     KeyboardAvoidingView,
     Platform,
     Image,
     Alert,
 } from 'react-native';
+import { LinearGradient }  from 'expo-linear-gradient';
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
@@ -24,6 +24,7 @@ const Option = (props) => {
     const [postText, setPostText] = useState('');
     const [threadTitle, setThreadTitle] = useState('');
     const [threadSelected, setThreadSelected] = useState(true);
+    const [groupDescription, setGroupDescription] = useState('');
 
     useEffect(() => {
         if (selectedOption === 'Posts') {
@@ -102,6 +103,18 @@ const Option = (props) => {
             return () => unsubscribe();
         }
     }, [selectedOption, props.group]);
+
+    useEffect(() => {
+        const groupDescriptionRef = ref(FIREBASE_DATABASE, `group-description/${props.group}`);
+
+        onValue(groupDescriptionRef, (snapshot) => {
+            if (snapshot.exists()) {
+                setGroupDescription(snapshot.val());
+            } else {
+                console.log('Group description not found!');
+            }
+        }, { onlyOnce: true });
+    }, []);
 
     const handleOptionClick = (option) => {
         setSelectedOption(option);
@@ -192,7 +205,10 @@ const Option = (props) => {
                 behavior={Platform.OS === "ios" ? "padding" : "height"} 
                 style={{ flex: 1 }}
             >
-                <View style={styles.optionContainer}>
+                <LinearGradient
+                    colors={['#77ABE6', '#F9C4F0']}
+                    style={styles.optionContainer}
+                >
                     <TouchableOpacity onPress={() => handleOptionClick('Posts')}>
                         <Text style={[styles.option, selectedOption === 'Posts' && styles.selectedOption]}>Posts</Text>
                     </TouchableOpacity>
@@ -202,7 +218,7 @@ const Option = (props) => {
                     <TouchableOpacity onPress={() => handleOptionClick('Media')}>
                         <Text style={[styles.option, selectedOption === 'Media' && styles.selectedOption]}>Media</Text>
                     </TouchableOpacity>
-                </View>
+                </LinearGradient>
                 {selectedOption === 'Posts' && (
                     <View>
                         <View style={styles.inputContainer}>
@@ -257,7 +273,7 @@ const Option = (props) => {
                                 </Text>
                                 <Text style={styles.timestampText}>{formatDate(post.timestamp)}</Text>
                                 <TouchableOpacity onPress={handleComment}>
-                                    <MaterialCommunityIcons name="comment-text" size={24} color="#17E69C" style={styles.iconComment} />
+                                    <MaterialCommunityIcons name="comment-text" size={24} color="#77ABE6" style={styles.iconComment} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -276,8 +292,20 @@ const Option = (props) => {
                         </View>
                     </View>
                 ))}
-                {selectedOption === 'Wiki' && <Text style={styles.displayOption}>Wiki here</Text>}
-                {selectedOption === 'Media' && <Text style={styles.displayOption}>Media here</Text>}
+                {selectedOption === 'Wiki' && 
+                    <View style={styles.wikiContainer}>
+                        <Text style={styles.wikiText}>
+                            {groupDescription}
+                        </Text>
+                    </View>
+                }
+                {selectedOption === 'Media' && 
+                    <View>
+                        <Text style={styles.displayOption}>
+                            Media here
+                        </Text>
+                    </View>
+                }
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -327,7 +355,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginHorizontal: 20,
         padding: 10,
-        backgroundColor: '#17E69C',
+        backgroundColor: '#241F55',
         borderRadius: 25,
         overflow: 'hidden',
     },
@@ -336,6 +364,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginHorizontal: 20,
         justifyContent: 'space-between',
+    },
+    wikiContainer: {
+        flex: 1,
+        marginVertical: 20,
+        marginHorizontal: 20,
     },
     input: {
         flex: 1, 
@@ -364,16 +397,16 @@ const styles = StyleSheet.create({
     },
     option: {
         padding: 10,
-        color: 'grey',
+        color: 'lightgrey',
         fontSize: 16,
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
     },
     selectedOption: {
         padding: 10,
-        fontSize: 16,
         color: 'white',
         fontFamily: 'BubbleFont',
+        fontSize: 16,
         fontWeight: 'bold',
     },
     displayOption: {
@@ -385,7 +418,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     threadTitleText: {
-        color: '#17E69C',
+        color: '#F9C4F0',
         fontWeight: '800',
     },
     usernameText: {
@@ -400,11 +433,16 @@ const styles = StyleSheet.create({
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
     },
+    wikiText: {
+        color: '#77ABE6',
+        fontFamily: 'BubbleFont',
+        fontSize: 15,
+    },
     buttonPost: {
         width: 60,
         alignItems: 'center',  
         justifyContent: 'center',  
-        backgroundColor: '#17E69C',
+        backgroundColor: '#77ABE6',
         padding: 10,
         borderRadius: 5,
     },

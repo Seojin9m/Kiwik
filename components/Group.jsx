@@ -26,9 +26,6 @@ import Option from './Option';
 import Taskbar from './Taskbar';
 
 const Group = ({ navigation, route }) => {
-    // Screen height (prototype) 
-    const screenHeight = Dimensions.get('window').height;
-
     const [group, setGroup] = useState(null);
 
     const groupImages = {
@@ -40,7 +37,7 @@ const Group = ({ navigation, route }) => {
         'STAYC': require('../assets/images/stayc-group.png'),
         // ... add more as needed
     }
-
+    
     useEffect(() => {
         const group = route.params.group;
         setGroup(group);
@@ -61,15 +58,17 @@ const Group = ({ navigation, route }) => {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     {group ? (
                         <View style={styles.container}>
-                            <Image 
-                                source={getGroupImages(group)} 
-                                style={styles.imageWallpaper}
-                            />
-                            <LinearGradient
-                                colors={['transparent', 'transparent', '#f5f5f5']}
-                                locations={[0, 0.65, 1]}
-                                style={styles.gradient}
-                            />
+                            <View style={styles.imageContainer}>
+                                <Image 
+                                    source={getGroupImages(group)} 
+                                    style={styles.imageWallpaper}
+                                />
+                                <LinearGradient
+                                    colors={['transparent', 'transparent', '#f5f5f5']}
+                                    locations={[0, 0.65, 1]}
+                                    style={styles.gradient}
+                                />
+                            </View>
                             <Text style={styles.title}>
                                 {group}
                             </Text>
@@ -82,7 +81,7 @@ const Group = ({ navigation, route }) => {
                         </View>
                     ) : (
                         <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#17E69C" />
+                            <ActivityIndicator size="large" color="#241F55" />
                         </View>
                     )}
                 </TouchableWithoutFeedback>
@@ -98,6 +97,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    imageContainer: {
+        height: '100%',  
+        width: '100%',
+        overflow: 'hidden'
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -108,7 +112,7 @@ const styles = StyleSheet.create({
         fontSize: 35,   
         fontWeight: '900',
         textAlign: 'center',
-        marginTop: 320,
+        marginTop: -465,
     },
     secondaryTitle: {
         color: 'white',
@@ -141,7 +145,7 @@ const styles = StyleSheet.create({
         width: 50,
         alignItems: 'center',  
         justifyContent: 'center',  
-        backgroundColor: '#17E69C',
+        backgroundColor: '#77ABE6',
         padding: 10,
         borderRadius: 5,
         position: 'absolute',

@@ -61,7 +61,7 @@ const Login = () => {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <LinearGradient
-                colors={['rgb(9, 205, 202)', 'rgb(23, 230, 156)']}
+                colors={['rgb(79, 146, 223)', 'rgb(249, 196, 243)']}
                 style={styles.container}
             >
                 <KeyboardAvoidingView behavior="padding">
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,    
     },
     buttonText: {
-        color: '#17E69C',
+        color: '#77ABE6',
         textAlign: 'center',
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',

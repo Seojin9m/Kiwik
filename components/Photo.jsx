@@ -8,7 +8,7 @@ import {
     TouchableWithoutFeedback, 
     Keyboard,
     Image,
-    Platform
+    Platform,
 } from 'react-native';
 
 import { useNavigation, useFocusEffect, NavigationContainer } from '@react-navigation/native';

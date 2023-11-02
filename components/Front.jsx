@@ -54,7 +54,7 @@ const Front = () => {
         <NavigationContainer independent={true}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <LinearGradient
-                    colors={['rgb(9, 205, 202)', 'rgb(23, 230, 156)']}
+                    colors={['rgb(79, 146, 223)', 'rgb(249, 196, 243)']}
                     style={styles.container}
                 >   
                     <TouchableOpacity style={styles.buttonSignOut} onPress={async () => {
@@ -63,7 +63,7 @@ const Front = () => {
                     }}>
                         <Text style={styles.buttonText}>Sign Out</Text>
                     </TouchableOpacity>
-                    <Text style={styles.title}>KIWIK</Text>
+                    <Text style={styles.title}>Kiwik</Text>
                     <View style={styles.searchContainer}>
                         <TextInput
                             ref={textInputRef}
@@ -72,10 +72,10 @@ const Front = () => {
                             onChangeText={setQuery}
                             onSubmitEditing={handleSearch} 
                             placeholder="Search for a group..."
-                            placeholderTextColor="gray"
+                            placeholderTextColor="lightgray"
                         />
                         <TouchableOpacity style={styles.buttonSearch} onPress={handleSearch}>
-                            <Ionicons name="ios-search" size={22} color="#17E69C"/>
+                            <Ionicons name="ios-search" size={22} color="#77ABE6"/>
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.secondaryTitle}>Your Groups</Text>
@@ -149,14 +149,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     buttonText: {
-        color: '#17E69C',
+        color: '#77ABE6',
         textAlign: 'center',
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
     },
     buttonAddGroupText: {
         fontSize: 30,
-        color: '#17E69C',
+        color: '#77ABE6',
         textAlign: 'center',
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
