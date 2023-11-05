@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     },
     option: {
         padding: 10,
-        color: 'lightgrey',
+        color: '#E0E0E0',
         fontSize: 16,
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',

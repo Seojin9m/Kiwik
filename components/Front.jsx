@@ -10,49 +10,117 @@ import {
     Keyboard,
 } from 'react-native';
 import { useNavigation, NavigationContainer } from '@react-navigation/native';
+import { Alert } from 'react-native';
 import { LinearGradient }  from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 import Taskbar from './Taskbar';
+import { GROUPS, GROUP_LOGOS } from './constants';
 
-import { FIREBASE_AUTH } from '../FirebaseConfig';
+import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
+import { getDatabase, ref, set, get, onValue, child } from 'firebase/database';
 
 const Front = () => {
     const navigation = useNavigation();
 
+    const userId = FIREBASE_AUTH.currentUser.uid;
     const [query, setQuery] = useState('');
-    const [groups, setGroups] = useState(['LE SSERAFIM', 'aespa', 'NewJeans', 'IVE', 'NMIXX', 'STAYC']);
-
+    const [groups, setGroups] = useState(GROUPS);
+    const [userGroups, setUserGroups] = useState([]);
+    const [suggestions, setSuggestions] = useState([]);
     const textInputRef = useRef(null);
 
-    const handleSearch = () => {
-        // Empty function for now
-        console.log("Search triggered with query: ", query);
-    };
+    const groupLogos = GROUP_LOGOS;
+
+    useEffect(() => {
+        if (query) {
+            setSuggestions(groups.filter((group) => group.toLowerCase().includes(query.toLowerCase())));
+        } else {
+            setSuggestions([]);
+        }
+    }, [query, groups]);
+
+    useEffect(() => {
+        const db = getDatabase();
+        const userGroupsRef = ref(db, `groups/${userId}`);
+    
+        const unsubscribe = onValue(userGroupsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const fetchedGroups = Object.keys(data).filter(key => data[key] === true);
+                setUserGroups(fetchedGroups);
+            } else {
+                console.log('No groups found for user.')
+            }
+        }, {
+            onlyOnce: false
+        });
+    
+        return () => unsubscribe();
+    }, [userId]);
 
     const handleAddGroup = () => {
-        if (textInputRef.current) {
-            textInputRef.current.focus();
+        if (!query) {
+            alert('Please enter a group name.');
+            return;
+        }
+    
+        if (groups.includes(query)) {
+            Alert.alert(
+                "Add Group",
+                `Are you sure you want to add ${query} to your groups?`,
+                [
+                    {
+                        text: "Confirm",
+                        onPress: () => {
+                            const db = getDatabase();
+                            const userGroupsRef = ref(db, `groups/${userId}`);
+    
+                            get(child(userGroupsRef, query)).then((snapshot) => {
+                                if (snapshot.exists()) {
+                                    alert('Group already added.');
+                                } else {
+                                    set(ref(db, `groups/${userId}/${query}`), true)
+                                        .then(() => {
+                                            console.log('Group added to Firebase database');
+                                        })
+                                        .catch((error) => {
+                                            console.error('Error adding group to Firebase database', error);
+                                        });
+                                }
+                            }).catch((error) => {
+                                console.error('Error checking group in Firebase database', error);
+                            });
+                        }
+                    },
+                    {
+                        text: "Cancel",
+                        style: "cancel"
+                    },
+                ]
+            );
+        } else {
+            alert('This group does not exist.');
         }
     };
 
-    const groupLogos = {
-        'LE SSERAFIM': require('../assets/logos/lesserafim-logo.png'),
-        'aespa': require('../assets/logos/aespa-logo.png'),
-        'NewJeans': require('../assets/logos/newjeans-logo.png'),
-        'IVE': require('../assets/logos/ive-logo.png'),
-        'NMIXX': require('../assets/logos/nmixx-logo.png'),
-        'STAYC': require('../assets/logos/stayc-logo.png'),
-        // ... add more as needed
-    }
+    const handleSuggestionClick = (groupName, event) => {
+        event.stopPropagation();
+        setSuggestions([]);
+        setQuery(groupName);
+    };
+
+    const dismissSuggestions = () => {
+        setSuggestions([]);
+    };
 
     const getGroupLogo = (groupName) => {
         return groupLogos[groupName] || null;
-    }
+    };
 
     return (
         <NavigationContainer independent={true}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); dismissSuggestions(); }}>
                 <LinearGradient
                     colors={['rgb(79, 146, 223)', 'rgb(249, 196, 243)']}
                     style={styles.container}
@@ -70,17 +138,29 @@ const Front = () => {
                             style={styles.input}
                             value={query}
                             onChangeText={setQuery}
-                            onSubmitEditing={handleSearch} 
                             placeholder="Search for a group..."
                             placeholderTextColor="lightgray"
                         />
-                        <TouchableOpacity style={styles.buttonSearch} onPress={handleSearch}>
-                            <Ionicons name="ios-search" size={22} color="#77ABE6"/>
+                        <TouchableOpacity style={styles.buttonAddGroup} onPress={handleAddGroup}>
+                            <Ionicons name="ios-add" size={28} color="#77ABE6"/>
                         </TouchableOpacity>
+                        {suggestions.length > 0 && (
+                            <View style={styles.suggestionContainer}>
+                                {suggestions.map((suggestion) => (           
+                                    <TouchableOpacity
+                                        key={suggestion}
+                                        onPress={(event) => handleSuggestionClick(suggestion, event)}
+                                        style={styles.suggestion}
+                                    >
+                                        <Text style={styles.suggestionText}>{suggestion}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
                     </View>
-                    <Text style={styles.secondaryTitle}>Your Groups</Text>
+                    <Text style={styles.secondaryTitle}>My Groups</Text>
                     <View style={styles.gridContainer}>
-                        {groups.map((group) => (
+                        {userGroups.map((group) => (
                             <View key={group}> 
                                 <TouchableOpacity style={styles.imageButton} onPress={() => {navigation.navigate('Group', { group: group })}}>
                                     <Image source={getGroupLogo(group)} style={styles.image}/>
@@ -88,9 +168,6 @@ const Front = () => {
                                 <Text style={styles.groupName}>{group}</Text>
                             </View>
                         ))}
-                        <TouchableOpacity style={styles.buttonAddGroup} onPress={handleAddGroup}>
-                            <Text style={styles.buttonAddGroupText}>+</Text>
-                        </TouchableOpacity>
                     </View>
                     <Taskbar/>
                 </LinearGradient>
@@ -111,12 +188,29 @@ const styles = StyleSheet.create({
         padding: 10,
         marginTop: 50,
         marginLeft: -10,
+        position: 'relative',
+        zIndex: 10,
     },
     gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyConent: 'flex-start',
         marginLeft: 15,
+    },
+    suggestionContainer: {
+        position: 'absolute',
+        top: 60,
+        left: 10,
+        right: 0,
+        zIndex: 10,
+        marginHorizontal: 10,
+        backgroundColor: 'white',
+        borderRadius: 4,
+        elevation: 2, // for Android shadow
+        shadowColor: '#000', // for iOS shadow
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     title: {
         color: 'white',
@@ -130,32 +224,33 @@ const styles = StyleSheet.create({
     secondaryTitle: {
         color: 'white',
         fontFamily: 'BubbleFont',
-        fontSize: 35,   
+        fontSize: 25,   
         fontWeight: 'bold',
-        textAlign: 'center',
-        marginTop: 40,
-        marginBottom: 20, 
+        textAlign: 'left',
+        marginHorizontal: 15,
+        marginTop: 35,
+        marginBottom: 10, 
     },
     input: {
         flex: 1,
         fontFamily: 'BubbleFont',
         fontSize: 20,
         width: '80%',
-        marginVertical: 5,
         marginHorizontal: 10,
         borderWidth: 0,
         borderRadius: 4,
         padding: 10,
         backgroundColor: '#fff',
     },
-    buttonText: {
-        color: '#77ABE6',
-        textAlign: 'center',
-        fontFamily: 'BubbleFont',
-        fontWeight: 'bold',
+    suggestion: {
+        padding: 10,
     },
-    buttonAddGroupText: {
-        fontSize: 30,
+    suggestionText: {
+        color: 'grey',
+        fontFamily: 'BubbleFont',
+        fontSize: 15,
+    },
+    buttonText: {
         color: '#77ABE6',
         textAlign: 'center',
         fontFamily: 'BubbleFont',
@@ -172,20 +267,11 @@ const styles = StyleSheet.create({
         top: 10,
         left: 300,
     },
-    buttonSearch: {
+    buttonAddGroup: {
         marginLeft: 0,
-        padding: 10,
+        padding: 7,
         backgroundColor: 'white',
         borderRadius: 5,
-    },
-    buttonAddGroup: {
-        width: 80,
-        height: 80,
-        margin: 5,
-        borderRadius: 40,
-        backgroundColor: 'white', 
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     groupName: {
         color: 'white',
