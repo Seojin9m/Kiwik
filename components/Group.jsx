@@ -81,7 +81,7 @@ const Group = ({ navigation, route }) => {
                         </View>
                     ) : (
                         <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#241F55" />
+                            <ActivityIndicator size="large" color="#77ABE6" />
                         </View>
                     )}
                 </TouchableWithoutFeedback>

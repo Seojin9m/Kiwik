@@ -147,7 +147,7 @@ const SignUp = () => {
                     <TouchableOpacity style={styles.button} onPress={signUp}>
                         <Text style={styles.buttonText}>Create Account</Text>
                     </TouchableOpacity>
-                    {isLoading && <ActivityIndicator size="large" color="#17E69C" style={styles.activityIndicator}/>}
+                    {isLoading && <ActivityIndicator size="large" color="#77ABE6" style={styles.activityIndicator}/>}
                 </View>
             </TouchableWithoutFeedback>
         </NavigationContainer>

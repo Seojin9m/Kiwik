@@ -1,9 +1,7 @@
 import { useEffect, useState  } from 'react';
-import { SafeAreaView } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
-import AppLoading from 'expo-app-loading';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { FIREBASE_AUTH } from '../FirebaseConfig';
@@ -31,13 +29,22 @@ const Home = () => {
     }, []);
 
     if (!fontsLoaded) {
-        return <AppLoading/>;
+        return (
+            <View style={styles.container}>
+                <StatusBar barStyle="dark-content"/>
+                <ActivityIndicator size="large" color="#77ABE6" />
+            </View>
+        )
     }
     
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.container}>
+            <StatusBar barStyle="dark-content"/>
             <NavigationContainer independent={true}>
-                <Stack.Navigator initialRouteName={user ? "Front" : "Login"} screenOptions={{ headerShown: false }}>
+                <Stack.Navigator 
+                    initialRouteName={user ? "Front" : "Login"}
+                    screenOptions={{ headerShown: false }}
+                >
                     <Stack.Screen name="Login" component={Login}/>
                     <Stack.Screen name="Front" component={Front}/>
                     <Stack.Screen name="Group" component={Group}/>
@@ -45,8 +52,14 @@ const Home = () => {
                     <Stack.Screen name="Photo" component={Photo}/>
                 </Stack.Navigator>
             </NavigationContainer>
-        </SafeAreaView>
+        </View>
     );
 }
 
 export default Home;
+
+const styles = StyleSheet.create({  
+    container: {
+        flex: 1,
+    },
+});

@@ -65,44 +65,38 @@ const Login = () => {
                 style={styles.container}
             >
                 <KeyboardAvoidingView behavior="padding">
-                    <ScrollView
-                        style={{ backgroundColor: 'transparent' }}
-                        contentContainerStyle={{flexGrow: 1}}
-                        keyboardShouldPersistTaps='handled'
-                    >
-                        <Text style={styles.title}>Kiwik</Text>
-                        <TextInput 
-                            value={email}
-                            style={styles.input} 
-                            placeholder="Email" 
-                            placeholderTextColor="lightgray"
-                            autoCapitalize="none"
-                            underlineColorAndroid="transparent"
-                            autoCorrect={false}
-                            onChangeText={(text) => setEmail(text)}
-                        ></TextInput>
-                        <TextInput 
-                            secureTextEntry={true}
-                            value={password}
-                            style={styles.input} 
-                            placeholder="Password" 
-                            placeholderTextColor="lightgray"
-                            autoCapitalize="none"
-                            onChangeText={(text) => setPassword(text)}
-                        ></TextInput>
-                        { loading ? (
-                            <ActivityIndicator style={styles.loadingIndicator} size="large" color="#FFFFFF"/> 
-                        ) : ( 
-                            <> 
-                                <TouchableOpacity style={[styles.button, styles.buttonSpace]} onPress={() => signIn()}>
-                                    <Text style={styles.buttonText}>Login</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
-                                    <Text style={styles.buttonText}>Create Account</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
-                    </ScrollView>
+                    <Text style={styles.title}>Kiwik</Text>
+                    <TextInput 
+                        value={email}
+                        style={styles.input} 
+                        placeholder="Email" 
+                        placeholderTextColor="lightgray"
+                        autoCapitalize="none"
+                        underlineColorAndroid="transparent"
+                        autoCorrect={false}
+                        onChangeText={(text) => setEmail(text)}
+                    ></TextInput>
+                    <TextInput 
+                        secureTextEntry={true}
+                        value={password}
+                        style={styles.input} 
+                        placeholder="Password" 
+                        placeholderTextColor="lightgray"
+                        autoCapitalize="none"
+                        onChangeText={(text) => setPassword(text)}
+                    ></TextInput>
+                    { loading ? (
+                        <ActivityIndicator style={styles.loadingIndicator} size="large" color="#FFFFFF"/> 
+                    ) : ( 
+                        <> 
+                            <TouchableOpacity style={[styles.button, styles.buttonSpace]} onPress={() => signIn()}>
+                                <Text style={styles.buttonText}>Login</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
+                                <Text style={styles.buttonText}>Create Account</Text>
+                            </TouchableOpacity>
+                        </>
+                    )}
                 </KeyboardAvoidingView>
             </LinearGradient>
         </TouchableWithoutFeedback>

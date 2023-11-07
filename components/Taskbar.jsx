@@ -7,9 +7,9 @@ const Taskbar = () => {
         console.log("Alarm triggered");
     }
 
-    const handlePressEdit = () => {
+    const handlePressHome = () => {
         // Empty function for now
-        console.log("Edit triggered");
+        console.log("Home triggered");
     }
 
     const handlePressProfile = () => {
@@ -23,8 +23,8 @@ const Taskbar = () => {
                 <TouchableOpacity onPress={handlePressAlarm}>
                     <Ionicons name="ios-notifications-outline" size={28} color="black"/>
                 </TouchableOpacity>     
-                <TouchableOpacity onPress={handlePressEdit}>
-                    <AntDesign name="addfolder" size={28} color="black" />
+                <TouchableOpacity onPress={handlePressHome}>
+                    <AntDesign name="home" size={28} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePressProfile}>
                     <MaterialIcons name="person-outline" size={28} color="black" />

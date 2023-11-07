@@ -11,7 +11,7 @@ import {
     Platform,
 } from 'react-native';
 
-import { useNavigation, useFocusEffect, NavigationContainer } from '@react-navigation/native';
+import { useNavigation, NavigationContainer } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE, FIREBASE_STORAGE } from '../FirebaseConfig';
@@ -129,7 +129,7 @@ const Photo = () => {
                         </TouchableOpacity>      
                     </View>
                     {uploading ? (
-                        <ActivityIndicator size="large" color="#17E69C" style={styles.activityIndicator}/>
+                        <ActivityIndicator size="large" color="#77ABE6" style={styles.activityIndicator}/>
                     ) : (
                         <TouchableOpacity 
                             style={styles.buttonSave} 
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     title: {
-        color: '#17E69C',
+        color: '#77ABE6',
         fontFamily: 'BubbleFont',
         fontSize: 30,   
         fontWeight: 'bold',
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     },
     buttonAddPhotoText: {
         fontSize: 30,
-        color: '#17E69C',
+        color: '#77ABE6',
         textAlign: 'center',
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
         alignItems: 'center',  
         justifyContent: 'center',  
-        backgroundColor: '#17E69C',
+        backgroundColor: '#77ABE6',
         padding: 10,
         borderRadius: 5,
     },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     },
     profileBorder: {
         borderRadius: 40,
-        borderColor: '#17E69C',
+        borderColor: '#77ABE6',
         borderWidth: 2,
     },
     activityIndicator: {

@@ -11,8 +11,10 @@ import {
     Image,
     Alert,
 } from 'react-native';
+import YouTubePlayer from 'react-native-youtube-iframe';
 import { LinearGradient }  from 'expo-linear-gradient';
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { GROUP_MEDIA } from './constants';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
 import { ref, push, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
@@ -25,6 +27,7 @@ const Option = (props) => {
     const [threadTitle, setThreadTitle] = useState('');
     const [threadSelected, setThreadSelected] = useState(true);
     const [groupDescription, setGroupDescription] = useState('');
+    const groupMedia = GROUP_MEDIA[props.group];
 
     useEffect(() => {
         if (selectedOption === 'Posts') {
@@ -297,13 +300,23 @@ const Option = (props) => {
                         <Text style={styles.wikiText}>
                             {groupDescription}
                         </Text>
+                        <YouTubePlayer
+                            height={300}
+                            videoId={groupMedia[1]}
+                            style={styles.youtube}
+                        />
                     </View>
                 }
                 {selectedOption === 'Media' && 
-                    <View>
-                        <Text style={styles.displayOption}>
-                            Media here
-                        </Text>
+                    <View style={styles.mediaContainer}>
+                        {GROUP_MEDIA[props.group] && Object.keys(GROUP_MEDIA[props.group]).map((index) => (
+                            <YouTubePlayer
+                                height={205}
+                                key={index}
+                                videoId={GROUP_MEDIA[props.group][index]}
+                                style={styles.youtube}
+                            />
+                        ))}
                     </View>
                 }
             </KeyboardAvoidingView>
@@ -366,6 +379,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     wikiContainer: {
+        flex: 1,
+        marginVertical: 20,
+        marginHorizontal: 20,
+    },
+    mediaContainer: {
         flex: 1,
         marginVertical: 20,
         marginHorizontal: 20,
@@ -434,9 +452,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     wikiText: {
-        color: '#77ABE6',
+        color: 'black',
         fontFamily: 'BubbleFont',
-        fontSize: 15,
+        fontSize: 16,
     },
     buttonPost: {
         width: 60,
@@ -460,5 +478,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderColor: '#f3f2f1',
         borderWidth: 1,
-    }
+    },
+    youtube: {
+    },
 });

@@ -15,7 +15,7 @@ import { LinearGradient }  from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 import Taskbar from './Taskbar';
-import { GROUPS, GROUP_LOGOS } from './constants';
+import { GROUPS, GROUP_LOGOS, NO_GROUP } from './constants';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
 import { getDatabase, ref, set, get, onValue, child } from 'firebase/database';
@@ -31,6 +31,7 @@ const Front = () => {
     const textInputRef = useRef(null);
 
     const groupLogos = GROUP_LOGOS;
+    const defaultGroupImage = NO_GROUP.image;
 
     useEffect(() => {
         if (query) {
@@ -50,6 +51,7 @@ const Front = () => {
                 const fetchedGroups = Object.keys(data).filter(key => data[key] === true);
                 setUserGroups(fetchedGroups);
             } else {
+                setUserGroups(['No Groups']);
                 console.log('No groups found for user.')
             }
         }, {
@@ -160,14 +162,21 @@ const Front = () => {
                     </View>
                     <Text style={styles.secondaryTitle}>My Groups</Text>
                     <View style={styles.gridContainer}>
-                        {userGroups.map((group) => (
-                            <View key={group}> 
-                                <TouchableOpacity style={styles.imageButton} onPress={() => {navigation.navigate('Group', { group: group })}}>
-                                    <Image source={getGroupLogo(group)} style={styles.image}/>
-                                </TouchableOpacity>
-                                <Text style={styles.groupName}>{group}</Text>
+                        {userGroups[0] === 'No Groups' ? (
+                            <View style={styles.defaultGroupContainer}>
+                                <Image source={defaultGroupImage} style={styles.defaultGroupImage}/>
+                                <Text style={styles.defaultGroupText}>You have no groups yet!</Text>
                             </View>
-                        ))}
+                        ) : userGroups.length > 0 ? (
+                            userGroups.map((group) => (
+                                <View key={group}> 
+                                    <TouchableOpacity style={styles.imageButton} onPress={() => {navigation.navigate('Group', { group: group })}}>
+                                        <Image source={getGroupLogo(group)} style={styles.image}/>
+                                    </TouchableOpacity>
+                                    <Text style={styles.groupName}>{group}</Text>
+                                </View>
+                            ))
+                        ) : null} 
                     </View>
                     <Taskbar/>
                 </LinearGradient>
@@ -211,6 +220,10 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
+    },
+    defaultGroupContainer: {
+        flex: 1,
+        alignItems: 'center',   
     },
     title: {
         color: 'white',
@@ -256,6 +269,11 @@ const styles = StyleSheet.create({
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
     },
+    defaultGroupText: {
+        color: 'white',
+        fontFamily: 'BubbleFont',
+        fontSize: 20,
+    },
     buttonSignOut: {
         width: 80,
         alignItems: 'center',  
@@ -292,5 +310,8 @@ const styles = StyleSheet.create({
         width: '100%', 
         height: '100%',
         resizeMode: 'contain', 
-    }
+    },
+    defaultGroupImage: {
+        marginVertical: 10,
+    },
 });
