@@ -300,15 +300,13 @@ const Option = (props) => {
                         <Text style={styles.wikiText}>
                             {groupDescription}
                         </Text>
-                        <YouTubePlayer
-                            height={300}
-                            videoId={groupMedia[1]}
-                            style={styles.youtube}
-                        />
                     </View>
                 }
                 {selectedOption === 'Media' && 
                     <View style={styles.mediaContainer}>
+                        <Text style={styles.mediaText}>
+                            Popular 
+                        </Text>
                         {GROUP_MEDIA[props.group] && Object.keys(GROUP_MEDIA[props.group]).map((index) => (
                             <YouTubePlayer
                                 height={205}
@@ -455,6 +453,13 @@ const styles = StyleSheet.create({
         color: 'black',
         fontFamily: 'BubbleFont',
         fontSize: 16,
+    },
+    mediaText: {
+        color: '#77ABE6',
+        fontFamily: 'BubbleFont',
+        fontSize: 22,
+        textAlign: 'center',
+        marginBottom: 20,
     },
     buttonPost: {
         width: 60,
