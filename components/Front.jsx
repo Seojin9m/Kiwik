@@ -7,12 +7,13 @@ import {
     Image,
     TouchableOpacity,
     TouchableWithoutFeedback, 
+    KeyboardAvoidingView,
     Keyboard,
 } from 'react-native';
 import { useNavigation, NavigationContainer } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import { LinearGradient }  from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
 
 import Taskbar from './Taskbar';
 import { GROUPS, GROUP_LOGOS, NO_GROUP } from './constants';
@@ -123,63 +124,69 @@ const Front = () => {
     return (
         <NavigationContainer independent={true}>
             <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); dismissSuggestions(); }}>
-                <LinearGradient
-                    colors={['rgb(79, 146, 223)', 'rgb(249, 196, 243)']}
-                    style={styles.container}
-                >   
-                    <TouchableOpacity style={styles.buttonSignOut} onPress={async () => {
-                        await FIREBASE_AUTH.signOut();
-                        navigation.navigate('Login');
-                    }}>
-                        <Text style={styles.buttonText}>Sign Out</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.title}>Kiwik</Text>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            ref={textInputRef}
-                            style={styles.input}
-                            value={query}
-                            onChangeText={setQuery}
-                            placeholder="Search for a group..."
-                            placeholderTextColor="lightgray"
-                        />
-                        <TouchableOpacity style={styles.buttonAddGroup} onPress={handleAddGroup}>
-                            <Ionicons name="ios-add" size={28} color="#77ABE6"/>
+                    <KeyboardAvoidingView 
+                        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+                        style={{ flex: 1 }}
+                    >
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.title}>Kiwik</Text>
+                        <TouchableOpacity style={styles.buttonSignOut} onPress={async () => {
+                            await FIREBASE_AUTH.signOut();
+                            navigation.navigate('Login');
+                        }}>
+                            <FontAwesome name="sign-out" size={24} color="black"/>
                         </TouchableOpacity>
-                        {suggestions.length > 0 && (
-                            <View style={styles.suggestionContainer}>
-                                {suggestions.map((suggestion) => (           
-                                    <TouchableOpacity
-                                        key={suggestion}
-                                        onPress={(event) => handleSuggestionClick(suggestion, event)}
-                                        style={styles.suggestion}
-                                    >
-                                        <Text style={styles.suggestionText}>{suggestion}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        )}
                     </View>
-                    <Text style={styles.secondaryTitle}>My Groups</Text>
-                    <View style={styles.gridContainer}>
-                        {userGroups[0] === 'No Groups' ? (
-                            <View style={styles.defaultGroupContainer}>
-                                <Image source={defaultGroupImage} style={styles.defaultGroupImage}/>
-                                <Text style={styles.defaultGroupText}>You have no groups yet!</Text>
-                            </View>
-                        ) : userGroups.length > 0 ? (
-                            userGroups.map((group) => (
-                                <View key={group}> 
-                                    <TouchableOpacity style={styles.imageButton} onPress={() => {navigation.navigate('Group', { group: group })}}>
-                                        <Image source={getGroupLogo(group)} style={styles.image}/>
-                                    </TouchableOpacity>
-                                    <Text style={styles.groupName}>{group}</Text>
+                    <LinearGradient
+                        colors={['rgb(79, 146, 223)', 'rgb(249, 196, 243)']}
+                        style={styles.container}
+                    >   
+                        <View style={styles.gridContainer}>
+                            {userGroups[0] === 'No Groups' ? (
+                                <View style={styles.defaultGroupContainer}>
+                                    <Image source={defaultGroupImage} style={styles.defaultGroupImage}/>
+                                    <Text style={styles.defaultGroupText}>You have no groups yet!</Text>
                                 </View>
-                            ))
-                        ) : null} 
-                    </View>
-                    <Taskbar navigation={navigation}/>
-                </LinearGradient>
+                            ) : userGroups.length > 0 ? (
+                                userGroups.map((group) => (
+                                    <View key={group}> 
+                                        <TouchableOpacity style={styles.imageButton} onPress={() => {navigation.navigate('Group', { group: group })}}>
+                                            <Image source={getGroupLogo(group)} style={styles.image}/>
+                                        </TouchableOpacity>
+                                        <Text style={styles.groupName}>{group}</Text>
+                                    </View>
+                                ))
+                            ) : null} 
+                        </View>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                ref={textInputRef}
+                                style={styles.input}
+                                value={query}
+                                onChangeText={setQuery}
+                                placeholder="Search for a group..."
+                                placeholderTextColor="grey"
+                            />
+                            <TouchableOpacity style={styles.buttonAddGroup} onPress={handleAddGroup}>
+                                <AntDesign name="addusergroup" size={24} color="black" />
+                            </TouchableOpacity>
+                            {suggestions.length > 0 && (
+                                <View style={styles.suggestionContainer}>
+                                    {[...suggestions].reverse().map((suggestion) => (    
+                                        <TouchableOpacity
+                                            key={suggestion}
+                                            onPress={(event) => handleSuggestionClick(suggestion, event)}
+                                            style={styles.suggestion}
+                                        >
+                                            <Text style={styles.suggestionText}>{suggestion}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+                        <Taskbar navigation={navigation}/>
+                    </LinearGradient>
+                </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
         </NavigationContainer>
     );
@@ -191,13 +198,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    titleContainer: {
+        flex: 1,
+        backgroundColor: 'white',
+        marginBottom: -670,
+    },
     searchContainer: {
+        backgroundColor: 'white',
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
-        marginTop: 50,
-        marginLeft: -10,
-        position: 'relative',
+        paddingVertical: 5,
+        paddingHorizontal: 5,
+        position: 'absolute',
+        bottom: 50,
+        left: 0,
+        right: 0,
         zIndex: 10,
     },
     gridContainer: {
@@ -205,19 +220,19 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyConent: 'flex-start',
         marginLeft: 15,
+        marginTop: 20,
     },
     suggestionContainer: {
         position: 'absolute',
-        top: 60,
+        bottom: 60,
         left: 10,
-        right: 0,
+        right: 10,
         zIndex: 10,
-        marginHorizontal: 10,
         backgroundColor: 'white',
         borderRadius: 4,
-        elevation: 2, // for Android shadow
-        shadowColor: '#000', // for iOS shadow
-        shadowOffset: { width: 0, height: 2 },
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
     },
@@ -226,33 +241,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',   
     },
     title: {
-        color: 'white',
+        color: '#77ABE6',
         fontFamily: 'BubbleFont',
-        fontSize: 35,   
+        fontSize: 30,   
         fontWeight: 'bold',
-        position: 'absolute',
-        top: 10,
-        left: 10, 
-    },
-    secondaryTitle: {
-        color: 'white',
-        fontFamily: 'BubbleFont',
-        fontSize: 25,   
-        fontWeight: 'bold',
-        textAlign: 'left',
-        marginHorizontal: 15,
-        marginTop: 35,
-        marginBottom: 10, 
+        textAlign: 'center',
     },
     input: {
         flex: 1,
         fontFamily: 'BubbleFont',
-        fontSize: 20,
+        fontSize: 15,
         width: '80%',
         marginHorizontal: 10,
         borderWidth: 0,
         borderRadius: 4,
         padding: 10,
+        borderWidth: 1, 
+        borderColor: 'grey', 
+        borderRadius: 10, 
         backgroundColor: '#fff',
     },
     suggestion: {
@@ -276,14 +282,8 @@ const styles = StyleSheet.create({
     },
     buttonSignOut: {
         width: 80,
-        alignItems: 'center',  
-        justifyContent: 'center',  
-        backgroundColor: 'white',
-        padding: 10,
-        borderRadius: 5,
-        position: 'absolute',
-        top: 10,
-        left: 300,
+        top: -30,
+        left: 350,
     },
     buttonAddGroup: {
         marginLeft: 0,
