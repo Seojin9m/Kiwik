@@ -20,6 +20,8 @@ import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
 import { ref, push, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
 
 const Option = (props) => {
+    const navigation = props.navigation;
+
     const [userDetails, setUserDetails] = useState({});
     const [posts, setPosts] = useState([]);
     const [selectedOption, setSelectedOption] = useState('Posts');
@@ -27,7 +29,6 @@ const Option = (props) => {
     const [threadTitle, setThreadTitle] = useState('');
     const [threadSelected, setThreadSelected] = useState(true);
     const [groupDescription, setGroupDescription] = useState('');
-    const groupMedia = GROUP_MEDIA[props.group];
 
     useEffect(() => {
         if (selectedOption === 'Posts') {
@@ -55,7 +56,10 @@ const Option = (props) => {
     
                             const profilePictureRef = ref(FIREBASE_DATABASE, `profile_pictures/${post.userId}/photoURL`);
                             onValue(profilePictureRef, (profilePictureSnapshot) => {
-                                let profileImageUrl = profilePictureSnapshot.exists() ? { uri: profilePictureSnapshot.val() } : require('../assets/images/default-profile.png');
+                                let profileImageUrl = profilePictureSnapshot.exists() 
+                                    ? { uri: profilePictureSnapshot.val() } 
+                                    : require('../assets/images/default-profile.png');
+                                    
                                 resolve({ userId: post.userId, username, profileImageUrl });
                             }, { onlyOnce: true });
                         }, { onlyOnce: true });
@@ -171,11 +175,6 @@ const Option = (props) => {
         });
     };
 
-    const handleComment = () => {
-        // Empty function for now
-        console.log("Comment triggered");
-    };
-
     const confirmDeletePost = (postId) => {
         Alert.alert(
             "Delete Post",
@@ -241,7 +240,6 @@ const Option = (props) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    
                 )}
                 <View style={styles.threadPostContainer}>
                     {threadSelected && selectedOption === 'Posts' && (
@@ -275,12 +273,16 @@ const Option = (props) => {
                                     {userDetails[post.userId]?.username}
                                 </Text>
                                 <Text style={styles.timestampText}>{formatDate(post.timestamp)}</Text>
-                                <TouchableOpacity onPress={handleComment}>
+                                <TouchableOpacity onPress={() => {
+                                    navigation.navigate('Comment', {
+                                        group: props.group, 
+                                        postId: post.id,
+                                        post: post
+                                    })
+                                }}>
                                     <MaterialCommunityIcons name="comment-text" size={24} color="#77ABE6" style={styles.iconComment} />
                                 </TouchableOpacity>
                             </View>
-                        </View>
-                        <View>
                         </View>
                         <View style={styles.postContentContainer}>
                             <View style={styles.postTextContainer}>
@@ -312,7 +314,6 @@ const Option = (props) => {
                                 height={205}
                                 key={index}
                                 videoId={GROUP_MEDIA[props.group][index]}
-                                style={styles.youtube}
                             />
                         ))}
                     </View>
@@ -483,7 +484,5 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderColor: '#f3f2f1',
         borderWidth: 1,
-    },
-    youtube: {
     },
 });

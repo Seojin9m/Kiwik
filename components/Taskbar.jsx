@@ -1,15 +1,16 @@
 import { View, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, AntDesign, MaterialIcons } from '@expo/vector-icons';
 
-const Taskbar = () => {
+const Taskbar = (props) => {
+    const navigation = props.navigation;
+
     const handlePressAlarm = () => {
         // Empty function for now
         console.log("Alarm triggered");
     }
 
     const handlePressHome = () => {
-        // Empty function for now
-        console.log("Home triggered");
+        navigation.navigate('Front');
     }
 
     const handlePressProfile = () => {

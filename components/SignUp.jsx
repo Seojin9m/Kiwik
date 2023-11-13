@@ -103,7 +103,7 @@ const SignUp = () => {
                     <TouchableOpacity style={styles.buttonGoBack} onPress={() => {
                         navigation.navigate('Login');
                     }}>
-                        <AntDesign name="arrowleft" size={20} style={styles.buttonText}/>
+                        <AntDesign name="arrowleft" size={20} style={styles.buttonGoBackText}/>
                     </TouchableOpacity>
                     <Text style={styles.title}>Kiwik</Text>
                     <TextInput 
@@ -196,12 +196,17 @@ const styles = StyleSheet.create({
         width: 50,
         alignItems: 'center',  
         justifyContent: 'center',  
-        backgroundColor: '#77ABE6',
         padding: 10,
         borderRadius: 5,
         position: 'absolute',
         top: 10,
         left: 330,
+    },
+    buttonGoBackText: {
+        color: '#77ABE6',
+        textAlign: 'center',
+        fontFamily: 'BubbleFont',
+        fontWeight: 'bold',
     },
     buttonText: {
         color: 'white',

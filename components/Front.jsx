@@ -178,7 +178,7 @@ const Front = () => {
                             ))
                         ) : null} 
                     </View>
-                    <Taskbar/>
+                    <Taskbar navigation={navigation}/>
                 </LinearGradient>
             </TouchableWithoutFeedback>
         </NavigationContainer>

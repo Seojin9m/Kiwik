@@ -11,6 +11,7 @@ import Login from '../components/Login.jsx';
 import SignUp from '../components/SignUp';
 import Front from '../components/Front.jsx';
 import Group from '../components/Group.jsx';
+import Comment from '../components/Comment.jsx';
 import Photo from '../components/Photo';
 
 const Stack = createNativeStackNavigator();
@@ -48,6 +49,7 @@ const Home = () => {
                     <Stack.Screen name="Login" component={Login}/>
                     <Stack.Screen name="Front" component={Front}/>
                     <Stack.Screen name="Group" component={Group}/>
+                    <Stack.Screen name="Comment" component={Comment}/>
                     <Stack.Screen name="SignUp" component={SignUp}/>
                     <Stack.Screen name="Photo" component={Photo}/>
                 </Stack.Navigator>

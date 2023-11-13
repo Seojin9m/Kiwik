@@ -19,10 +19,8 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { LinearGradient }  from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons';
+
 import Option from './Option';
-
-// import firebase here
-
 import Taskbar from './Taskbar';
 
 const Group = ({ navigation, route }) => {
@@ -41,8 +39,6 @@ const Group = ({ navigation, route }) => {
     useEffect(() => {
         const group = route.params.group;
         setGroup(group);
-
-        // Fetch group data from firebase here
     }, [route.params.group]);
 
     const getGroupImages = (group) => {
@@ -77,7 +73,7 @@ const Group = ({ navigation, route }) => {
                             }}>
                                 <AntDesign name="arrowleft" size={20} style={styles.buttonText}/>
                             </TouchableOpacity>
-                            <Option group={group}/>
+                            <Option group={group} navigation={navigation}/>
                         </View>
                     ) : (
                         <View style={styles.loadingContainer}>
@@ -86,7 +82,7 @@ const Group = ({ navigation, route }) => {
                     )}
                 </TouchableWithoutFeedback>
             </ScrollView>
-            <Taskbar/>
+            <Taskbar navigation={navigation}/>
         </NavigationContainer>
     );
 }
@@ -145,7 +141,6 @@ const styles = StyleSheet.create({
         width: 50,
         alignItems: 'center',  
         justifyContent: 'center',  
-        backgroundColor: '#77ABE6',
         padding: 10,
         borderRadius: 5,
         position: 'absolute',
