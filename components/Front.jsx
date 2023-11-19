@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 5,
+        paddingVertical: 10,
         paddingHorizontal: 5,
         position: 'absolute',
         bottom: 50,

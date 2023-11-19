@@ -6,6 +6,7 @@ import {
     TouchableOpacity, 
     StyleSheet, 
     TextInput,
+    ScrollView,
     KeyboardAvoidingView,
     Platform,
     Image,
@@ -261,6 +262,7 @@ const Option = (props) => {
                         </View>
                     )}
                 </View>
+                <ScrollView>
                 {selectedOption === 'Posts' && posts.map(post => (
                     <View key={post.id} style={styles.textContainer}>
                         <View style={styles.profileContainer}>
@@ -297,6 +299,7 @@ const Option = (props) => {
                         </View>
                     </View>
                 ))}
+                </ScrollView>
                 {selectedOption === 'Wiki' && 
                     <View style={styles.wikiContainer}>
                         <Text style={styles.wikiText}>

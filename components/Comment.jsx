@@ -20,7 +20,7 @@ import { LinearGradient }  from 'expo-linear-gradient';
 import { FontAwesome, AntDesign, Feather, Ionicons} from '@expo/vector-icons';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
-import { ref, push, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
+import { ref, push, set, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
 
 import Taskbar from './Taskbar';
 
@@ -186,7 +186,7 @@ const Comment = ({ navigation, route }) => {
             userId: FIREBASE_AUTH.currentUser.uid,
             commentText: commentText,
             timestamp: new Date().toISOString(),
-        }
+        };
 
         // Push the comment object to database
         push(newCommentRef, newComment).then(() => {
@@ -194,6 +194,8 @@ const Comment = ({ navigation, route }) => {
         }).catch((error) => {
             console.log("Error posting comment: ", error);
         });
+
+        createNotification(postId, post.userId, FIREBASE_AUTH.currentUser.uid);
     };
 
     const handleCommentImageUpload = () => {
@@ -234,6 +236,25 @@ const Comment = ({ navigation, route }) => {
                 }
             ]
         );
+    };
+
+    const createNotification = (postId, postOwnerId, commentOwnerId) => {
+        if (postOwnerId !== commentOwnerId) {
+            const newNotificationRef = ref(FIREBASE_DATABASE, `notifications/${postOwnerId}`);
+            const newNotification = {
+                postId: postId,
+                triggeredById: commentOwnerId,
+                type: 'comment',
+                read: false,
+            };
+
+            // Push the notification object to database
+            push(newNotificationRef, newNotification).then(() => {
+                console.log("Notification created successfully")
+            }).catch((error) => {
+                console.log("Error creating notification: ", error);
+            });
+        }
     };
 
     const formatDate = (timestamp) => {
