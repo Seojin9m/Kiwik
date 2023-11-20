@@ -203,7 +203,6 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontFamily: 'BubbleFont',
         fontWeight: 'bold',
-        
     },
     buttonGoBack: {
         width: 50,

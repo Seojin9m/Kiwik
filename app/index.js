@@ -13,6 +13,7 @@ import Front from '../components/Front.jsx';
 import Group from '../components/Group.jsx';
 import Comment from '../components/Comment.jsx';
 import Notification from '../components/Notification.jsx';
+import Profile from '../components/Profile.jsx';
 import Photo from '../components/Photo';
 
 const Stack = createNativeStackNavigator();
@@ -52,6 +53,7 @@ const Home = () => {
                     <Stack.Screen name="Group" component={Group}/>
                     <Stack.Screen name="Comment" component={Comment}/>
                     <Stack.Screen name="Notification" component={Notification}/>
+                    <Stack.Screen name="Profile" component={Profile}/>
                     <Stack.Screen name="SignUp" component={SignUp}/>
                     <Stack.Screen name="Photo" component={Photo}/>
                 </Stack.Navigator>

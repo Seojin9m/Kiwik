@@ -33,8 +33,7 @@ const Taskbar = (props) => {
     }
 
     const handlePressProfile = () => {
-        // Empty function for now
-        console.log("Profile triggered");
+        navigation.navigate('Profile');
     }
 
     return (
