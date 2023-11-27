@@ -13,19 +13,22 @@ import {
     Alert,
 } from 'react-native';
 import YouTubePlayer from 'react-native-youtube-iframe';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient }  from 'expo-linear-gradient';
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { GROUP_MEDIA } from './constants';
 
-import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
-import { ref, push, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
+import { FIREBASE_AUTH, FIREBASE_DATABASE, FIREBASE_STORAGE } from '../FirebaseConfig';
+import { ref, push, set, remove, onValue, query, equalTo, orderByChild } from 'firebase/database';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Option = (props) => {
     const navigation = props.navigation;
 
+    const [selectedOption, setSelectedOption] = useState('Posts');
     const [userDetails, setUserDetails] = useState({});
     const [posts, setPosts] = useState([]);
-    const [selectedOption, setSelectedOption] = useState('Posts');
+    const [image, setImage] = useState(null);
     const [postText, setPostText] = useState('');
     const [threadTitle, setThreadTitle] = useState('');
     const [threadSelected, setThreadSelected] = useState(true);
@@ -124,42 +127,65 @@ const Option = (props) => {
         }, { onlyOnce: true });
     }, []);
 
+    useEffect(() => {
+        (async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                alert('Sorry, we need media library permissions to make this work!');
+            }
+        })();
+    }, []);
+
     const handleOptionClick = (option) => {
         setSelectedOption(option);
     };
 
-    const handlePostImageUpload = () => {
-        // Empty function for now
-        console.log("Image upload triggered");
+    const handlePostImageUpload = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+    
+        console.log('Image upload result: ', result);
+    
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
     };
 
-    const handlePost = () => {
+    const handlePost = async () => {
+        const newPostRef = push(ref(FIREBASE_DATABASE, 'posts'));
         try {
+            let imageUrl = '';
+            if (image) {
+                const response = await fetch(image);
+                const blob = await response.blob();
+                const imageRef = storageRef(FIREBASE_STORAGE, `post_images/${newPostRef.key}`);
+                const snapshot = await uploadBytes(imageRef, blob);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+    
             const post = {
                 userId: FIREBASE_AUTH.currentUser.uid,
                 groupId: props.group,
-                postText: postText,
-                threadTitle: threadTitle,
+                postText: postText || '',
+                threadTitle: threadTitle || '',
                 timestamp: new Date().toISOString(),
-            }
-
+                imageUrl: imageUrl,
+            };
+    
             console.log('New post:', post);
 
-            // Reference to post database node
-            const postsRef = ref(FIREBASE_DATABASE, 'posts');
+            await set(newPostRef, post);
+            console.log("Post successfully added");
 
-            // Push the post object to the database
-            push(postsRef, post).then(() => {
-                console.log("Post successfully added");
-            }).catch((error) => {
-                console.log("Error saving post: ", error);
-            });
-        } catch (error) {
-            console.log("Error saving post: ", error);
-        } finally {
-            // Clear inputs after posting
             setPostText('');
             setThreadTitle('');
+            setImage(null);
+        } catch (error) {
+            console.log("Error saving post: ", error);
         }
     };
 
@@ -263,42 +289,51 @@ const Option = (props) => {
                     )}
                 </View>
                 <ScrollView>
-                {selectedOption === 'Posts' && posts.map(post => (
-                    <View key={post.id} style={styles.textContainer}>
-                        <View style={styles.profileContainer}>
-                            <Image 
-                                source={userDetails[post.userId]?.profileImageUrl} 
-                                style={styles.profileImage}
-                            />
-                            <View style={styles.userDetailsContainer}>
-                                <Text style={styles.usernameText}>
-                                    {userDetails[post.userId]?.username}
-                                </Text>
-                                <Text style={styles.timestampText}>{formatDate(post.timestamp)}</Text>
-                                <TouchableOpacity onPress={() => {
-                                    navigation.navigate('Comment', {
-                                        group: props.group, 
-                                        postId: post.id,
-                                        post: post
-                                    })
-                                }}>
-                                    <MaterialCommunityIcons name="comment-text" size={24} color="#77ABE6" style={styles.iconComment} />
-                                </TouchableOpacity>
+                    {selectedOption === 'Posts' && posts.map(post => (
+                        <View key={post.id} style={styles.textContainer}>
+                            <View style={styles.profileContainer}>
+                                <Image 
+                                    source={userDetails[post.userId]?.profileImageUrl} 
+                                    style={styles.profileImage}
+                                />
+                                <View style={styles.userDetailsContainer}>
+                                    <Text style={styles.usernameText}>
+                                        {userDetails[post.userId]?.username}
+                                    </Text>
+                                    <Text style={styles.timestampText}>{formatDate(post.timestamp)}</Text>
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('Comment', {
+                                            group: props.group, 
+                                            postId: post.id,
+                                            post: post
+                                        })
+                                    }}>
+                                        <MaterialCommunityIcons name="comment-text" size={24} color="#77ABE6" style={styles.iconComment} />
+                                    </TouchableOpacity>
+                                    {post.userId === FIREBASE_AUTH.currentUser.uid && (
+                                        <TouchableOpacity onPress={() => confirmDeletePost(post.id)}>
+                                            <Ionicons name="ios-trash-sharp" size={24} color="#FF7377"style={styles.iconDelete} />
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+                            </View>
+                            <View style={styles.postContentContainer}>
+                                {post.imageUrl ? (
+                                    <Image
+                                        source={{ uri: post.imageUrl }}
+                                        style={styles.postImage}
+                                        resizeMode="cover"
+                                    />
+                                ) : null}
+                                <View style={styles.postTextContainer}>
+                                    <Text style={styles.postText}>{post.postText}</Text>
+                                    {post.threadTitle && 
+                                        <Text style={styles.threadTitleText}>#{post.threadTitle}</Text>
+                                    }
+                                </View>
                             </View>
                         </View>
-                        <View style={styles.postContentContainer}>
-                            <View style={styles.postTextContainer}>
-                                <Text style={styles.postText}>{post.postText}</Text>
-                                <Text style={styles.threadTitleText}>#{post.threadTitle}</Text>
-                            </View>
-                            {post.userId === FIREBASE_AUTH.currentUser.uid && (
-                                <TouchableOpacity onPress={() => confirmDeletePost(post.id)}>
-                                    <Ionicons name="ios-trash-sharp" size={24} color="#FF7377" />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </View>
-                ))}
+                    ))}
                 </ScrollView>
                 {selectedOption === 'Wiki' && 
                     <View style={styles.wikiContainer}>
@@ -348,9 +383,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     postContentContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'stretch',
     },
     postTextContainer: {
         flex: 1,
@@ -481,11 +516,23 @@ const styles = StyleSheet.create({
         top: -30,
         right: 0,
     },
+    iconDelete: {
+        position: 'absolute',
+        top: -32,
+        right: 35,
+    },
     profileImage: {
         width: 40,
         height: 40,
         borderRadius: 20,
         borderColor: '#f3f2f1',
         borderWidth: 1,
+    },
+    postImage: {
+        width: '90%',
+        height: 200, 
+        borderRadius: 10, 
+        marginTop: 10, 
+        marginBottom: 10,
     },
 });

@@ -17,7 +17,7 @@ import { LinearGradient }  from 'expo-linear-gradient';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 
 import { FIREBASE_AUTH, FIREBASE_DATABASE } from '../FirebaseConfig';
-import { ref, onValue, query, orderByChild, equalTo,} from 'firebase/database';
+import { ref, onValue, query, orderByChild, equalTo } from 'firebase/database';
 
 import Taskbar from './Taskbar';
 
